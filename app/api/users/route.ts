@@ -3,21 +3,6 @@ import { PrismaClient, Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// GET: Fetch all users
-export async function GET() {
-  try {
-    const users = await prisma.user.findMany()
-    return NextResponse.json(users)
-  } catch (error) {
-    console.error('GET /api/users error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch users' },
-      { status: 500 }
-    )
-  }
-}
-
-// POST: Create a new user
 export async function POST(req: Request) {
   try {
     const { name, email } = await req.json()
@@ -44,6 +29,8 @@ export async function POST(req: Request) {
         { status: 409 }
       )
     }
+
+    console.error('[POST /api/users] Error:', error)
 
     return NextResponse.json(
       { error: 'Failed to create user' },
