@@ -3,12 +3,12 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params
   const id = parseInt(params.id)
-  if (isNaN(id)) {
-    return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
-  }
-
   const data = await req.json()
 
   try {
@@ -18,20 +18,27 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     })
     return NextResponse.json(user)
   } catch (error) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    return NextResponse.json(
+      { error: 'Failed to update user' },
+      { status: 500 }
+    )
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params
   const id = parseInt(params.id)
-  if (isNaN(id)) {
-    return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
-  }
 
   try {
     await prisma.user.delete({ where: { id } })
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    return NextResponse.json(
+      { error: 'Failed to delete user' },
+      { status: 500 }
+    )
   }
 }
