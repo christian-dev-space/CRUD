@@ -14,23 +14,39 @@ export default function Home() {
   const [users, setUsers] = useState<User[]>([])
 
   const fetchUsers = async () => {
-    const res = await fetch('/api/users')
-    const data = await res.json()
-    setUsers(data)
+    try {
+      const res = await fetch('/api/users')
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null)
+        throw new Error(errorData?.error || 'Failed to fetch users')
+      }
+
+      const data = await res.json()
+
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format: expected an array of users')
+      }
+
+      setUsers(data)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      toast.error((error as Error).message)
+    }
   }
 
-const deleteUser = async (id: number) => {
-  if (!confirm('Are you sure?')) return
+  const deleteUser = async (id: number) => {
+    if (!confirm('Are you sure?')) return
 
-  try {
-    const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
-    if (!res.ok) throw new Error('Delete failed')
-    toast.success('User deleted')
-    fetchUsers()
-  } catch (error) {
-    toast.error((error as Error).message)
+    try {
+      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Delete failed')
+      toast.success('User deleted')
+      fetchUsers()
+    } catch (error) {
+      toast.error((error as Error).message)
+    }
   }
-}
 
   useEffect(() => {
     fetchUsers()
