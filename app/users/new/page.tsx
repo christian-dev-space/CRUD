@@ -32,8 +32,14 @@ export default function NewUser() {
       })
 
       if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.error || 'Failed to create user')
+        let errorMessage = 'Failed to create user'
+        try {
+          const errorData = await res.json()
+          errorMessage = errorData?.error || errorMessage
+        } catch {
+          // fallback to default error message if JSON parsing fails
+        }
+        throw new Error(errorMessage)
       }
 
       toast.success('User created successfully!')
@@ -69,6 +75,7 @@ export default function NewUser() {
           errors.email ? 'border-red-600' : 'border-gray-300'
         }`}
         placeholder="Email"
+        type="email"
       />
       {errors.email && (
         <p className="text-red-600 text-sm mb-4">{errors.email.message}</p>

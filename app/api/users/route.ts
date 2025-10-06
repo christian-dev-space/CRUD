@@ -1,17 +1,52 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// Get all users
+// GET: Fetch all users
 export async function GET() {
-  const users = await prisma.user.findMany()
-  return NextResponse.json(users)
+  try {
+    const users = await prisma.user.findMany()
+    return NextResponse.json(users)
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch users' },
+      { status: 500 }
+    )
+  }
 }
 
-// Create a new user
+// POST: Create a new user
 export async function POST(req: Request) {
-  const data = await req.json()
-  const user = await prisma.user.create({ data })
-  return NextResponse.json(user)
+  try {
+    const { name, email } = await req.json()
+
+    if (!name || !email) {
+      return NextResponse.json(
+        { error: 'Name and email are required' },
+        { status: 400 }
+      )
+    }
+
+    const user = await prisma.user.create({
+      data: { name, email },
+    })
+
+    return NextResponse.json(user, { status: 201 })
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      return NextResponse.json(
+        { error: 'Email already exists' },
+        { status: 409 }
+      )
+    }
+
+    return NextResponse.json(
+      { error: 'Failed to create user' },
+      { status: 500 }
+    )
+  }
 }

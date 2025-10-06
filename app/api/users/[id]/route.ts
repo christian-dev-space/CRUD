@@ -5,10 +5,9 @@ const prisma = new PrismaClient()
 
 export async function PUT(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } }
 ) {
-  const params = await context.params
-  const id = parseInt(params.id)
+  const id = parseInt(context.params.id)
   const data = await req.json()
 
   try {
@@ -27,10 +26,9 @@ export async function PUT(
 
 export async function DELETE(
   _: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } }
 ) {
-  const params = await context.params
-  const id = parseInt(params.id)
+  const id = parseInt(context.params.id)
 
   try {
     await prisma.user.delete({ where: { id } })
