@@ -13,6 +13,7 @@ export default function EditUser() {
     const fetchUser = async () => {
       const res = await fetch(`/api/users`)
       const users = await res.json()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const user = users.find((u: any) => u.id === parseInt(id as string))
       if (user) {
         setName(user.name)
